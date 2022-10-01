@@ -2,11 +2,9 @@
   <v-app>
    <v-main class="rooms-list">
      <v-row>
-       <rooms-list @room="chooseRoom"/>
+       <rooms-list />
        <chat-component
            v-if="isShowChat"
-           :name-room="selectedRoom"
-           :show="isShowChat"
        />
      </v-row>
    </v-main>
@@ -27,21 +25,16 @@ export default {
   },
 
   data: () => ({
-    rooms: null,
     selectedRoom: null,
-    history: null,
-    isShowChat: false,
-    message: '',
-    ws: null,
-    username: "Козьма Прутков",
-    newRoomName: ''
   }),
-  methods: {
-    chooseRoom(data) {
-      this.selectedRoom = data.nameRoom
-      this.isShowChat = data.show
-    }
-  }
+  computed: {
+    nameRoom() {
+      return this.$store.state.roomName
+    },
+    isShowChat() {
+      return !!this.nameRoom
+    },
+  },
 };
 </script>
 

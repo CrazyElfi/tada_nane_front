@@ -32,6 +32,7 @@
 
 <script>
 import MessageComponent from "@/components/ui/MessageComponent";
+import {mapActions} from "vuex";
 
 export default {
   name: "RoomCards",
@@ -46,11 +47,14 @@ export default {
   },
   methods: {
     async openChat(nameRoom) {
-      this.$emit("open", {
-        nameRoom: nameRoom,
-        show: true,
-      })
+      await this.fetchRoomName(nameRoom)
+      await this.fetchRoomHistory()
     },
+
+    ...mapActions([
+      'fetchRoomName',
+      'fetchRoomHistory',
+    ])
 
   }
 }

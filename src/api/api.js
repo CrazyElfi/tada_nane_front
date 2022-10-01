@@ -1,5 +1,7 @@
 import axios from "axios"
 
+let ws = null;
+
 export default {
     async getRooms() {
         const data = await axios.get('https://nane.tada.team/api/rooms');
@@ -16,17 +18,14 @@ export default {
         return data.data?.result;
     },
 
-    connectToWebsocket() {
-        this.ws = new WebSocket( `wss://nane.tada.team/ws?username=${this.username}` );
-        this.ws.addEventListener('open', (event) => { this.onWebsocketOpen(event) });
-    },
-
-    onWebsocketOpen() {
-        console.log("connected to WS!");
+    connectWebsocket(userName) {
+        ws = new WebSocket(`wss://nane.tada.team/ws?username=${userName}`);
+        ws.addEventListener('open', () => {
+            console.log("connected to WS!");
+        });
     },
 
     sendMessageToWebsocket(msg) {
-            this.ws.send(JSON.stringify(msg));
+        ws.send(JSON.stringify(msg));
     }
-
 }

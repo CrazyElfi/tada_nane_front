@@ -52,79 +52,69 @@
 import moment from "moment";
 import Api  from "@/api/api"
 import MessageComponent from "@/components/ui/MessageComponent";
+import {mapActions} from "vuex";
 
 export default {
   name: "ChatComponent",
   components: {
     "message-component": MessageComponent
   },
-  props: {
-    nameRoom: {
-      type: String,
-      required: true,
-    },
-    show: {
-      type: Boolean,
-      required: true,
-    },
-  },
 
   data: () => ({
-    rooms: null,
-    selectedRoom: null,
-    history: null,
     isShowChat: false,
     message: '',
     ws: null,
-    username: "Козьма Прутков",
     newRoomName: ''
   }),
+  computed: {
+    history() {
+      return this.$store.state.roomHistory
+    },
+    nameRoom() {
+      return this.$store.state.roomName
+    },
+    username() {
+      return this.$store.state.username
+    }
+  },
+
   async mounted() {
-    this.history = null
-    await this.openChat(this.nameRoom);
-    this.connectToWebsocket(ws);
+    await this.fetchRoomHistory();
     this.scrollToLastMessage();
+    Api.connectWebsocket(this.username);
   },
   methods: {
     moment,
-    async openChat(nameRoom) {
-      try {
-        this.history = await Api.getRoomHistory(this.nameRoom);
 
-        this.selectedRoom = nameRoom;
-      } catch (e) {
-        console.log(e);
-      }
-    },
-
-    closeRooms() {
-      this.history = null;
+    async closeRooms() {
+      await this.$store.commit('updateRoomHistory', null)
+      await this.$store.commit('updateRoomName', null)
     },
 
     async sendMessage(msg) {
       let message = {
-        "room": this.selectedRoom,
+        "room": this.nameRoom,
         "text": msg,
-      }
-
-      if(this.history === null) {
-        message.created = new Date().toISOString();
-        message.sender = { "username": this.username };
       }
 
       if (msg !== "") {
         Api.sendMessageToWebsocket(message)
         this.message = ""; // есть ли сценарий обезопасить себя от удаления сообщения если в сокете будет ошибка?
-        await Api.getRooms()  // ошибка
+        await this.fetchRoomsList();
       }
 
-      this.history = await Api.getRoomHistory(this.selectedRoom);
+      await this.fetchRoomHistory();
     },
 
     scrollToLastMessage() {
       const hiddenElem = document.getElementById('hidden-block')
       hiddenElem.scrollIntoView({block: "end"});
-    }
+    },
+
+    ...mapActions([
+      'fetchRoomsList',
+      'fetchRoomHistory'
+    ])
   }
 }
 </script>
