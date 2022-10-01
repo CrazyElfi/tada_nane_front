@@ -1,28 +1,58 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <v-app>
+   <v-main class="rooms-list">
+     <v-row>
+       <rooms-list @room="chooseRoom"/>
+       <chat-component
+           v-if="isShowChat"
+           :name-room="selectedRoom"
+           :show="isShowChat"
+       />
+     </v-row>
+   </v-main>
+  </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import RoomsList from "@/components/RoomsList";
+import ChatComponent from "@/components/ChatComponent";
 
 export default {
   name: 'App',
+
   components: {
-    HelloWorld
+    'rooms-list': RoomsList,
+    "chat-component": ChatComponent,
+
+  },
+
+  data: () => ({
+    rooms: null,
+    selectedRoom: null,
+    history: null,
+    isShowChat: false,
+    message: '',
+    ws: null,
+    username: "Козьма Прутков",
+    newRoomName: ''
+  }),
+  methods: {
+    chooseRoom(data) {
+      this.selectedRoom = data.nameRoom
+      this.isShowChat = data.show
+    }
   }
-}
+};
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+<style lang="scss">
+.user-name {
+  color: #00008b;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid darkblue;
+  outline: none;
 }
 </style>
