@@ -10,6 +10,12 @@ export default new Vuex.Store({
     roomHistory: null,
     roomName: null,
     username: "Козьма Прутков",
+    settings: {
+      maxMessageLength: 50,
+      maxRoomTitleLength: 50,
+      maxUsernameLength: 50,
+      uptime: 0,
+    },
   },
   mutations: {
     updateRoomsList(state, rooms) {
@@ -17,35 +23,51 @@ export default new Vuex.Store({
     },
 
     updateRoomHistory(state, history) {
-      state.roomHistory = history
+      state.roomHistory = history;
     },
 
     updateRoomName(state, name) {
-      state.roomName = name
+      state.roomName = name;
     },
 
     updateUserName(state, name) {
-      state.username = name
-    }
+      state.username = name;
+    },
+
+    updateSettings(state, settings) {
+      state.settings = settings;
+    },
   },
   actions: {
     async fetchRoomsList({ commit }) {
       const data = await Api.getRooms();
-      commit('updateRoomsList', data)
+      commit('updateRoomsList', data);
     },
 
     async fetchRoomHistory({ commit }) {
-      const data = await Api.getRoomHistory(this.state.roomName)
+      const data = await Api.getRoomHistory(this.state.roomName);
 
-      commit('updateRoomHistory', data)
+      commit('updateRoomHistory', data);
     },
 
     fetchRoomName({ commit }, roomName) {
-      commit('updateRoomName', roomName)
+      commit('updateRoomName', roomName);
     },
 
     fetchUserName({ commit }, newName) {
-      commit('updateUserName', newName)
-    }
+      commit('updateUserName', newName);
+    },
+
+    async fetchSettings({ commit }) {
+      const data = await Api.getSettings();
+
+      let settings = {
+        maxMessageLength: data.max_message_length,
+        maxRoomTitleLength: data.max_room_title_length,
+        maxUsernameLength: data.max_username_length,
+        uptime: data.uptime,
+      };
+      commit('updateSettings', settings);
+    },
   },
 })

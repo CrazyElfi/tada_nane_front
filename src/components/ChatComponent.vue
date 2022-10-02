@@ -24,10 +24,10 @@
         <div id="hidden-block"></div>
       </div>
 
-      <v-row class="d-flex align-center mt-3 mb-3">
+      <v-row class="d-flex align-center mt-3">
         <v-col cols="10">
           <input
-              v-model="message"
+              v-model="$v.message.$model"
               class="input pa-1"
               type="text"
               placeholder="Type your message"
@@ -44,38 +44,45 @@
           </v-btn>
         </v-col>
       </v-row>
+          <div class="error--text" v-if="!$v.message.maxLength">
+            Сообщение должно быть меньше {{ validationRules.maxMessageLength  }} знаков
+          </div>
     </v-container>
   </v-col>
 </template>
 
 <script>
 import moment from "moment";
-import Api  from "@/api/api"
+import Api  from "@/api/api";
 import MessageComponent from "@/components/ui/MessageComponent";
-import {mapActions} from "vuex";
+import { mapActions } from "vuex";
+import { maxLength } from "vuelidate/lib/validators";
 
 export default {
   name: "ChatComponent",
   components: {
-    "message-component": MessageComponent
+    "message-component": MessageComponent,
   },
 
   data: () => ({
     isShowChat: false,
     message: '',
     ws: null,
-    newRoomName: ''
+    newRoomName: '',
   }),
   computed: {
     history() {
-      return this.$store.state.roomHistory
+      return this.$store.state.roomHistory;
     },
     nameRoom() {
-      return this.$store.state.roomName
+      return this.$store.state.roomName;
     },
     username() {
-      return this.$store.state.username
-    }
+      return this.$store.state.username;
+    },
+    validationRules() {
+      return this.$store.state?.settings;
+    },
   },
 
   async mounted() {
@@ -87,18 +94,18 @@ export default {
     moment,
 
     async closeRooms() {
-      await this.$store.commit('updateRoomHistory', null)
-      await this.$store.commit('updateRoomName', null)
+      await this.$store.commit('updateRoomHistory', null);
+      await this.$store.commit('updateRoomName', null);
     },
 
     async sendMessage(msg) {
       let message = {
         "room": this.nameRoom,
         "text": msg,
-      }
+      };
 
       if (msg !== "") {
-        Api.sendMessageToWebsocket(message)
+        Api.sendMessageToWebsocket(message);
         this.message = ""; // есть ли сценарий обезопасить себя от удаления сообщения если в сокете будет ошибка?
         await this.fetchRoomsList();
       }
@@ -107,15 +114,23 @@ export default {
     },
 
     scrollToLastMessage() {
-      const hiddenElem = document.getElementById('hidden-block')
+      const hiddenElem = document.getElementById('hidden-block');
       hiddenElem.scrollIntoView({block: "end"});
     },
 
     ...mapActions([
       'fetchRoomsList',
-      'fetchRoomHistory'
+      'fetchRoomHistory',
     ])
-  }
+  },
+
+  validations() {
+    return {
+      message: {
+        maxLength: maxLength(this.validationRules?.maxMessageLength),
+      },
+    }
+  },
 }
 </script>
 
