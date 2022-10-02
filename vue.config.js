@@ -5,5 +5,8 @@ module.exports = defineConfig({
   ],
   configureWebpack: {
     devtool: 'source-map',
-  }
+  },
+  publicPath: process.env.NODE_ENV === 'production'
+      ? '/tada_nane_front/'
+      : '/'
 })
